@@ -1,0 +1,8 @@
+---
+- name: Common tasks
+  hosts: one
+  gather_facts: yes
+  vars:
+    node_version: v12.16.3
+  roles:
+    - { role: nvm, install: yes }
