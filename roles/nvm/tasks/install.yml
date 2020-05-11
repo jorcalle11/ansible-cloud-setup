@@ -1,0 +1,44 @@
+---
+- name: Download and install nvm
+  shell: >
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh | PROFILE={{ nvm_profile }} bash
+  args:
+    creates: '{{ ansible_env.HOME }}/.nvm/nvm.sh'
+    warn: no
+  register: nvm_install
+
+- name: Remove default nvm lines
+  lineinfile:
+    path: '{{ nvm_profile }}'
+    regexp: 'NVM_DIR'
+    state: absent
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - nvm_install is succeeded
+    - nvm_install.changed
+
+- name: Add lines to load nvm before capistrano condition
+  blockinfile:
+    path: '{{ nvm_profile }}'
+    insertbefore: "# If not running interactively, don't do anything"
+    block: |
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - nvm_install is succeeded
+    - nvm_install.changed
+
+- name: Install Node.js version {{ node_version }}
+  command: bash -ic 'nvm install {{ node_version }}'
+  args:
+    creates: ~/.nvm/versions/node/{{ node_version }}/bin/node
+  register: new_node_version
+
+- name: Set {{ node_version }} as default Node.js version
+  command: bash -ic 'nvm alias default {{ node_version }}'
+  when: new_node_version.changed
+
+- name: Make sure Node.js is correctly installed
+  command: node -v

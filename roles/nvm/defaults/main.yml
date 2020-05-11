@@ -1,0 +1,5 @@
+---
+nvm_version: v0.35.3
+nvm_profile: .bashrc
+node_version: v12.16.3
+install: yes
