@@ -4,5 +4,12 @@
   gather_facts: yes
   vars:
     node_version: v12.16.3
+    install_nvm: yes
   roles:
-    - { role: nvm, install: yes }
+    - { role: nvm, install: '{{ install_nvm }}' }
+  tasks:
+    - name: Install pm2
+      npm:
+        name: pm2
+        global: yes
+      when: install_nvm
