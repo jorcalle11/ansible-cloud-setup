@@ -1,0 +1,35 @@
+---
+- name: Covid-19 - Deploy
+  hosts: covid19
+  vars:
+    app_name: covid-19
+    dir_path: /var/www/covid-19
+    serve_port: 3000
+  tasks:
+    - name: Clone repository on {{ dir_path }}
+      git:
+        accept_hostkey: yes
+        clone: yes
+        dest: '{{ dir_path }}'
+        repo: git@github.com:ecsupport/covid-19.git
+        version: test
+
+    - name: Install dependecies
+      npm:
+        path: '{{ dir_path }}'
+
+    - name: Check if app {{ app_name }} is running
+      command: pm2 id {{ app_name }}
+      register: app_id
+      ignore_errors: true
+
+    - name: Deploy {{ app_name }} app
+      command: pm2 serve {{ dir_path }}/public  {{ serve_port }} --name {{ app_name }}
+      when: app_id is failed or (app_id.stdout is defined and app_id.stdout == '[]')
+
+    - name: Restart {{ app_name }} app
+      command: pm2 restart {{ app_name }}
+      when: app_id is succeeded and app_id.stdout is defined and app_id.stdout != '[]'
+
+    - name: Save pm2 processes
+      command: pm2 save

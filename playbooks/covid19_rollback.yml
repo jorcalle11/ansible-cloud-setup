@@ -1,0 +1,24 @@
+---
+- name: Covid-19 - Rollback
+  hosts: covid19
+  vars:
+    app_name: covid-19
+    dir_path: /var/www/covid-19
+  tasks:
+    - name: Check if app {{ app_name }} is running
+      command: pm2 id {{ app_name }}
+      register: app_id
+      ignore_errors: true
+
+    - name: Stop {{ app_name }} running processes
+      command: pm2 stop {{ app_name }}
+      when: app_id is succeeded and app_id.stdout is defined and app_id.stdout != '[]'
+
+    - name: Delete {{ app_name }} app
+      command: pm2 delete {{ app_name }}
+      when: app_id is succeeded and app_id.stdout is defined and app_id.stdout != '[]'
+
+    - name: Delete directory
+      file:
+        path: '{{ dir_path }}'
+        state: absent
