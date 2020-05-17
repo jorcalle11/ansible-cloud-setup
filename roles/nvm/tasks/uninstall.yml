@@ -1,8 +1,12 @@
 ---
 - name: Uninstall nvm
   file:
-    path: ~/.nvm
+    path: '{{ item }}'
     state: absent
+  with_items:
+    - ~/.pm2
+    - ~/.npm
+    - ~/.nvm
 
 - name: Delete lines to load nvm
   blockinfile:
