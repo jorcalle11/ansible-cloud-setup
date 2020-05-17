@@ -2,9 +2,9 @@
 - name: Should execute nvm install tasks
   include_tasks:
     file: install.yml
-  when: install
+  when: install|bool
 
 - name: Should execute nvm uninstall tasks
   include_tasks:
     file: uninstall.yml
-  when: not install
+  when: not install|bool
