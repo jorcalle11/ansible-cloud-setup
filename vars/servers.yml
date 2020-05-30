@@ -1,0 +1,4 @@
+---
+servers:
+  - { ip: 10.104.189.248, name: node1, user: ubuntu }
+  - { ip: 10.104.189.225, name: node2, identityFile: ~/.ssh/some_key.pem }

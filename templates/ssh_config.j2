@@ -1,0 +1,13 @@
+{% for server in servers %}
+Host {{ server.name }}
+Hostname {{ server.name }}
+{% if server.user is defined %}
+User {{ server.user }}
+{% else %}
+User {{ ansible_user }}
+{% endif %}
+{% if server.identityFile is defined %}
+IdentityFile {{ server.identityFile }}
+{% endif %}
+
+{% endfor %}
